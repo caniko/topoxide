@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Scientific graph rendering</p>
+    <h1>{{ section.title }}</h1>
+    <p class="tagline">{{ section.extra.tagline }}</p>
+    <p class="subtitle">{{ section.extra.subtitle }}</p>
+    <div class="actions">
+      <a class="button primary" href="{{ config.base_url | safe }}/docs/">Get started</a>
+      <a class="button secondary" href="https://codeberg.org/caniko/topoxide">View source</a>
+    </div>
+  </div>
+  <div class="graph-preview" aria-label="Layered ETL graph preview">
+    <div class="lane lane-a">
+      <span>Sources</span>
+      <i></i><i></i><i></i>
+    </div>
+    <div class="lane lane-b">
+      <span>Runtime</span>
+      <i></i><i></i><i></i>
+    </div>
+    <div class="lane lane-c">
+      <span>Tables</span>
+      <i></i><i></i><i></i>
+    </div>
+    <div class="lane lane-d">
+      <span>Consumers</span>
+      <i></i><i></i>
+    </div>
+    <svg viewBox="0 0 640 360" role="presentation" aria-hidden="true">
+      <path d="M105 96 C180 96 190 142 260 142 S365 188 450 188" />
+      <path d="M190 96 C255 122 292 222 360 226 S465 272 540 272" />
+      <path d="M112 272 C180 230 210 188 305 188 S420 142 528 142" />
+      <path d="M318 142 C370 142 390 96 528 96" />
+    </svg>
+  </div>
+</section>
+
+<section class="features" aria-label="Features">
+  {% for feature in section.extra.features %}
+  <article>
+    <h2>{{ feature.title }}</h2>
+    <p>{{ feature.body }}</p>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="install">
+  <div>
+    <p class="eyebrow">Install</p>
+    <h2>Render from a spec in one command.</h2>
+  </div>
+  <pre><code>{{ section.extra.install }}</code></pre>
+</section>
+{% endblock content %}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="{{ lang | default(value='en') }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ config.description }}">
+    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+    <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+  </head>
+  <body>
+    <header class="site-nav">
+      <a class="brand" href="{{ config.base_url | safe }}">{{ config.title }}</a>
+      <nav aria-label="Primary navigation">
+        <a href="{{ config.base_url | safe }}/docs/">Documentation</a>
+        <a href="https://codeberg.org/caniko/topoxide">Source</a>
+      </nav>
+    </header>
+    <main>
+      {% block content %}{% endblock content %}
+    </main>
+    <footer class="site-footer">
+      <span>Apache-2.0</span>
+      <span>Built for deterministic scientific graph figures.</span>
+    </footer>
+  </body>
+</html>

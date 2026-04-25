@@ -1,1 +1,5 @@
 /target/
+/result
+/result-*
+/docs/book/
+/website/public/

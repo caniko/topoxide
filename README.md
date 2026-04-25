@@ -16,3 +16,20 @@ topoxide schema --output topoxide.schema.json
 ```
 
 JSON and TOML inputs use the same schema.
+
+## Website and documentation
+
+The project includes a Codeberg Pages site and mdBook documentation:
+
+```bash
+nix build .#website
+nix build .#docs
+nix build .#site
+```
+
+For local development:
+
+```bash
+cd website && zola serve
+cd docs && mdbook serve
+```
