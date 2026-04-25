@@ -78,19 +78,79 @@ fn read_spec(path: &PathBuf) -> Result<GraphSpec, Box<dyn std::error::Error>> {
 }
 
 fn schema_document() -> &'static str {
-    r#"{
+    r##"{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Topoxide GraphSpec",
   "type": "object",
   "required": ["title", "groups", "nodes"],
+  "additionalProperties": false,
   "properties": {
     "title": {"type": "string"},
     "subtitle": {"type": "string"},
-    "groups": {"type": "array"},
-    "nodes": {"type": "array"},
-    "edges": {"type": "array"},
-    "theme": {"type": "object"}
+    "groups": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/group"}
+    },
+    "nodes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "edges": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/edge"}
+    },
+    "theme": {"$ref": "#/$defs/theme"}
+  },
+  "$defs": {
+    "group": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "label": {"type": "string"},
+        "order": {"type": "integer", "minimum": 0},
+        "description": {"type": "string"}
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "label", "kind", "group"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "label": {"type": "string"},
+        "kind": {"type": "string"},
+        "group": {"type": "string"},
+        "detail": {"type": "string"},
+        "order": {"type": "integer", "minimum": 0},
+        "weight": {"type": "number"}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["source", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "minLength": 1},
+        "target": {"type": "string", "minLength": 1},
+        "kind": {"type": "string"},
+        "label": {"type": "string"}
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": {"type": "string"},
+        "ink": {"type": "string"},
+        "muted": {"type": "string"},
+        "grid": {"type": "string"},
+        "accent": {"type": "string"},
+        "font-family": {"type": "string"}
+      }
+    }
   }
 }
-"#
+"##
 }
