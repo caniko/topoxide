@@ -1,0 +1,31 @@
+title = "Simple graph"
+subtitle = "CLI smoke fixture"
+
+[[groups]]
+id = "sources"
+label = "Sources"
+order = 0
+
+[[groups]]
+id = "tables"
+label = "Tables"
+order = 1
+
+[[nodes]]
+id = "dataset"
+label = "Dataset"
+kind = "dataset"
+group = "sources"
+order = 0
+
+[[nodes]]
+id = "neurons"
+label = "neurons"
+kind = "clickhouse-table"
+group = "tables"
+order = 0
+
+[[edges]]
+source = "dataset"
+target = "neurons"
+kind = "imports"
