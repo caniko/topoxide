@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::schema::{GraphNode, GraphSpec};
-use crate::validate::{validate_graph, ValidationError};
+use crate::validate::{ValidationError, validate_graph};
 
 #[derive(Debug, Clone, Copy)]
 pub struct RenderOptions {
@@ -35,8 +35,7 @@ pub fn render_svg(spec: &GraphSpec, options: RenderOptions) -> Result<String, Va
     let lane_header_h = 42.0;
     let group_gap = 18.0;
     let node_w: f32 = 188.0;
-    let node_h: f32 = 56.0;
-    let node_gap: f32 = 18.0;
+    let max_node_h: f32 = 56.0;
 
     let mut groups = spec.groups.iter().collect::<Vec<_>>();
     groups.sort_by(|a, b| {
@@ -72,11 +71,8 @@ pub fn render_svg(spec: &GraphSpec, options: RenderOptions) -> Result<String, Va
         let nodes = by_group.get(group.id.as_str()).cloned().unwrap_or_default();
         let count = nodes.len().max(1);
         let available_h = lane_h - lane_header_h - 28.0;
-        let step = if count <= 1 {
-            0.0
-        } else {
-            ((available_h - node_h) / (count - 1) as f32).max(node_h + node_gap)
-        };
+        let node_h = adaptive_node_height(available_h, count).min(max_node_h);
+        let step = adaptive_step(available_h, count, node_h);
         let actual_h = node_h + step * (count.saturating_sub(1) as f32);
         let start_y = top + lane_header_h + ((available_h - actual_h).max(0.0) / 2.0) + 14.0;
         for (node_idx, node) in nodes.iter().enumerate() {
@@ -209,39 +205,51 @@ pub fn render_svg(spec: &GraphSpec, options: RenderOptions) -> Result<String, Va
         push_line(
             &mut svg,
             &format!(
-                r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="7" fill="#ffffff" stroke="{color}" stroke-width="1.4" filter="url(#soft-shadow)"/>"##,
-                node.x, node.y, node.w, node.h
+                r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="{:.1}" fill="#ffffff" stroke="{color}" stroke-width="{:.1}" filter="url(#soft-shadow)"/>"##,
+                node.x,
+                node.y,
+                node.w,
+                node.h,
+                (node.h * 0.14).clamp(2.5, 7.0),
+                if node.h < 24.0 { 0.9 } else { 1.4 }
             ),
         );
+        let stripe_h = (node.h - 10.0).max(6.0);
         push_line(
             &mut svg,
             &format!(
-                r##"<rect x="{:.1}" y="{:.1}" width="5" height="{:.1}" rx="2.5" fill="{color}"/>"##,
+                r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{stripe_h:.1}" rx="{:.1}" fill="{color}"/>"##,
                 node.x + 8.0,
-                node.y + 9.0,
-                node.h - 18.0
+                node.y + (node.h - stripe_h) / 2.0,
+                if node.h < 24.0 { 3.0 } else { 5.0 },
+                if node.h < 24.0 { 1.5 } else { 2.5 }
             ),
         );
+        let label_font = (node.h * 0.25).clamp(7.0, 13.0);
+        let detail_font = (node.h * 0.20).clamp(6.0, 10.5);
+        let label_lines = if node.h < 26.0 { 1 } else { 2 };
         push_wrapped_text(
             &mut svg,
             &node.node.label,
             node.x + 22.0,
-            node.y + 23.0,
+            node.y + (node.h * 0.45).max(label_font + 2.0),
             node.w - 32.0,
-            13.0,
-            2,
+            label_font,
+            label_lines,
             &spec.theme.ink,
             &spec.theme.font_family,
             true,
         );
-        if let Some(detail) = &node.node.detail {
+        if node.h >= 34.0
+            && let Some(detail) = &node.node.detail
+        {
             push_wrapped_text(
                 &mut svg,
                 detail,
                 node.x + 22.0,
-                node.y + 44.0,
+                node.y + node.h - 11.0,
                 node.w - 32.0,
-                10.5,
+                detail_font,
                 1,
                 &spec.theme.muted,
                 &spec.theme.font_family,
@@ -253,6 +261,28 @@ pub fn render_svg(spec: &GraphSpec, options: RenderOptions) -> Result<String, Va
     push_legend(&mut svg, spec, options);
     push_line(&mut svg, "</svg>");
     Ok(svg)
+}
+
+fn adaptive_node_height(available_h: f32, count: usize) -> f32 {
+    if count <= 1 {
+        return 56.0;
+    }
+    let count = count as f32;
+    let target_gap = if count > 36.0 {
+        3.0
+    } else if count > 24.0 {
+        5.0
+    } else {
+        10.0
+    };
+    ((available_h - target_gap * (count - 1.0)) / count).clamp(13.0, 56.0)
+}
+
+fn adaptive_step(available_h: f32, count: usize, node_h: f32) -> f32 {
+    if count <= 1 {
+        return 0.0;
+    }
+    ((available_h - node_h) / (count - 1) as f32).max(node_h + 1.0)
 }
 
 fn push_legend(svg: &mut String, spec: &GraphSpec, options: RenderOptions) {
