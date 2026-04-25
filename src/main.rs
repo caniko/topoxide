@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use topoxide::{render_svg, validate_graph, GraphSpec, RenderOptions};
+use topoxide::{GraphSpec, RenderOptions, render_svg, validate_graph};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
