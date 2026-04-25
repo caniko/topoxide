@@ -4,12 +4,16 @@ use std::process::Command;
 fn cli_renders_fixture() {
     let tmp = tempfile::tempdir().unwrap();
     let output = tmp.path().join("simple.svg");
+    let input = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("fixtures")
+        .join("simple.toml");
 
     let status = Command::new(env!("CARGO_BIN_EXE_topoxide"))
         .args([
             "render",
             "--input",
-            "tests/fixtures/simple.toml",
+            input.to_str().unwrap(),
             "--output",
             output.to_str().unwrap(),
         ])
