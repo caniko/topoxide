@@ -112,10 +112,6 @@ pub fn render_svg(spec: &GraphSpec, options: RenderOptions) -> Result<String, Va
             spec.theme.muted
         ),
     );
-    push_line(
-        &mut svg,
-        r##"<filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.8" flood-color="#000000" flood-opacity="0.10"/></filter>"##,
-    );
     push_line(&mut svg, "</defs>");
     push_line(
         &mut svg,
@@ -205,7 +201,7 @@ pub fn render_svg(spec: &GraphSpec, options: RenderOptions) -> Result<String, Va
         push_line(
             &mut svg,
             &format!(
-                r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="{:.1}" fill="#ffffff" stroke="{color}" stroke-width="{:.1}" filter="url(#soft-shadow)"/>"##,
+                r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" rx="{:.1}" fill="#ffffff" stroke="{color}" stroke-width="{:.1}"/>"##,
                 node.x,
                 node.y,
                 node.w,
