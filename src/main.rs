@@ -2,7 +2,9 @@ use std::fs;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use topoxide::{GraphSpec, RenderOptions, render_svg, validate_graph};
+use topoxide::{
+    RenderOptions, TopoxideInput, read_input, render_document_svg, render_svg, validate_graph,
+};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
@@ -18,6 +20,8 @@ enum Command {
         input: PathBuf,
         #[arg(long)]
         output: PathBuf,
+        #[arg(long)]
+        profile: Option<String>,
         #[arg(long, default_value_t = 1800.0)]
         width: f32,
         #[arg(long, default_value_t = 1200.0)]
@@ -31,6 +35,12 @@ enum Command {
         #[arg(long)]
         output: PathBuf,
     },
+    ExportJson {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+    },
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -39,19 +49,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Command::Render {
             input,
             output,
+            profile,
             width,
             height,
         } => {
-            let spec = read_spec(&input)?;
-            let svg = render_svg(&spec, RenderOptions { width, height })?;
+            let input = read_input(&input)?;
+            let svg = match input {
+                TopoxideInput::Graph(spec) => render_svg(&spec, RenderOptions { width, height })?,
+                TopoxideInput::Document(document) => render_document_svg(
+                    &document,
+                    profile.as_deref(),
+                    RenderOptions { width, height },
+                )?,
+            };
             if let Some(parent) = output.parent() {
                 fs::create_dir_all(parent)?;
             }
             fs::write(output, svg)?;
         }
         Command::Validate { input } => {
-            let spec = read_spec(&input)?;
-            validate_graph(&spec)?;
+            match read_input(&input)? {
+                TopoxideInput::Graph(spec) => validate_graph(&spec)?,
+                TopoxideInput::Document(document) => validate_graph(&document.graph)?,
+            }
             println!("OK");
         }
         Command::Schema { output } => {
@@ -60,21 +80,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             fs::write(output, schema_document())?;
         }
+        Command::ExportJson { input, output } => {
+            let input = read_input(&input)?;
+            if let Some(parent) = output.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            let json = match input {
+                TopoxideInput::Graph(spec) => serde_json::to_string_pretty(&spec)?,
+                TopoxideInput::Document(document) => serde_json::to_string_pretty(&document)?,
+            };
+            fs::write(output, json)?;
+        }
     }
     Ok(())
-}
-
-fn read_spec(path: &PathBuf) -> Result<GraphSpec, Box<dyn std::error::Error>> {
-    let text = fs::read_to_string(path)?;
-    let ext = path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or_default();
-    match ext {
-        "json" => Ok(serde_json::from_str(&text)?),
-        "toml" => Ok(toml::from_str(&text)?),
-        other => Err(format!("unsupported input extension: {other}").into()),
-    }
 }
 
 fn schema_document() -> &'static str {
@@ -123,8 +141,21 @@ fn schema_document() -> &'static str {
         "kind": {"type": "string"},
         "group": {"type": "string"},
         "detail": {"type": "string"},
+        "metrics": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/nodeMetric"}
+        },
         "order": {"type": "integer", "minimum": 0},
         "weight": {"type": "number"}
+      }
+    },
+    "nodeMetric": {
+      "type": "object",
+      "required": ["label", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {"type": "string"},
+        "value": {"type": "string"}
       }
     },
     "edge": {

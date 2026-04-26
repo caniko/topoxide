@@ -10,10 +10,18 @@ repository = "ssh://git@codeberg.org/caniko/topoxide.git"
 name = "topoxide"
 path = "src/main.rs"
 
+[features]
+default = []
+leptos = ["dep:leptos"]
+ssr = ["leptos", "leptos/ssr"]
+hydrate = ["leptos", "leptos/hydrate"]
+
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+leptos = { version = "=0.8.19", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 toml = "0.9"
 thiserror = "2"
 

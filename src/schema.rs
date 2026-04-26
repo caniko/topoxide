@@ -17,6 +17,79 @@ pub struct GraphSpec {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
+pub struct TopoxideDocument {
+    pub graph: GraphSpec,
+    #[serde(default)]
+    pub profiles: Vec<GraphProfile>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct GraphProfile {
+    pub id: String,
+    pub label: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub view: ProfileViewKind,
+    #[serde(default)]
+    pub edge_mode: EdgeMode,
+    #[serde(default)]
+    pub groups: Vec<String>,
+    #[serde(default)]
+    pub node_kinds: Vec<String>,
+    #[serde(default)]
+    pub edge_kinds: Vec<String>,
+    #[serde(default = "default_show_lane_enclosures")]
+    pub show_lane_enclosures: bool,
+    #[serde(default)]
+    pub matrix: Option<MatrixProfile>,
+}
+
+pub fn default_show_lane_enclosures() -> bool {
+    true
+}
+
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum ProfileViewKind {
+    #[default]
+    LaneGraph,
+    Matrix,
+}
+
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum EdgeMode {
+    #[default]
+    All,
+    Bundled,
+    Hidden,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct MatrixProfile {
+    pub row_group: String,
+    #[serde(default)]
+    pub columns: Vec<MatrixColumn>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct MatrixColumn {
+    pub id: String,
+    pub label: String,
+    #[serde(default)]
+    pub edge_kinds: Vec<String>,
+    #[serde(default)]
+    pub target_groups: Vec<String>,
+    #[serde(default)]
+    pub target_kinds: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct GraphGroup {
     pub id: String,
     pub label: String,
@@ -36,9 +109,18 @@ pub struct GraphNode {
     #[serde(default)]
     pub detail: Option<String>,
     #[serde(default)]
+    pub metrics: Vec<GraphNodeMetric>,
+    #[serde(default)]
     pub order: usize,
     #[serde(default)]
     pub weight: Option<f32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct GraphNodeMetric {
+    pub label: String,
+    pub value: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
