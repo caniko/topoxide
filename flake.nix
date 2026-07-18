@@ -1,9 +1,14 @@
 {
   description = "topoxide deterministic graph figure renderer";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    rs-harbor.url = "git+https://codeberg.org/caniko/rs-harbor.git?ref=trunk&rev=9bfa8bdb0ecb22d7bc11448665f7fbaebae7a759";
+    nixpkgs.follows = "rs-harbor/nixpkgs";
+    rust-overlay.follows = "rs-harbor/rust-overlay";
+    crane.follows = "rs-harbor/crane";
+  };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, rs-harbor, rust-overlay, ... }:
     let
       systems = [
         "x86_64-linux"
@@ -14,27 +19,39 @@
       forAllSystems = f:
         nixpkgs.lib.genAttrs systems (system:
           f {
-            pkgs = import nixpkgs { inherit system; };
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [ (import rust-overlay) ];
+            };
             lib = nixpkgs.lib;
           });
     in
     {
       packages = forAllSystems ({ pkgs, lib }:
         let
-          topoxide = pkgs.rustPlatform.buildRustPackage {
+          toolchain = rs-harbor.lib.mkToolchain { inherit pkgs; };
+          buildCache = rs-harbor.lib.mkBuildCachePolicy {
+            inherit pkgs;
+            sccachePackage = rs-harbor.packages.${pkgs.system}.sccache;
+            cacheRoot = null;
+            namespaceScope = "canix-rust";
+            namespaceGeneration = 5;
+          };
+          topoxideSrc = lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              ./Cargo.toml
+              ./Cargo.lock
+              ./src
+              ./tests
+            ];
+          };
+          topoxide = buildCache.withRustCache { package = toolchain.craneLib.buildPackage {
             pname = "topoxide";
             version = "0.1.0";
-            src = lib.fileset.toSource {
-              root = ./.;
-              fileset = lib.fileset.unions [
-                ./Cargo.toml
-                ./Cargo.lock
-                ./src
-                ./tests
-              ];
-            };
-            cargoLock.lockFile = ./Cargo.lock;
-          };
+            src = topoxideSrc;
+            cargoExtraArgs = "--bin topoxide";
+          }; };
 
           website = pkgs.stdenv.mkDerivation {
             pname = "topoxide-website";
@@ -83,14 +100,14 @@
           inherit topoxide website docs site;
         });
 
-      devShells = forAllSystems ({ pkgs, ... }: {
+      devShells = forAllSystems ({ pkgs, ... }:
+        let
+          toolchain = rs-harbor.lib.mkToolchain { inherit pkgs; };
+        in {
         default = pkgs.mkShell {
           packages = [
-            pkgs.cargo
-            pkgs.clippy
+            toolchain.rustToolchain
             pkgs.mdbook
-            pkgs.rustc
-            pkgs.rustfmt
             pkgs.zola
           ];
           shellHook = ''
