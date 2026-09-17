@@ -2,13 +2,13 @@
   description = "topoxide deterministic graph figure renderer";
 
   inputs = {
-    rs-harbor.url = "git+https://github.com/caniko/rs-harbor.git?ref=trunk&rev=f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac";
-    nixpkgs.follows = "rs-harbor/nixpkgs";
-    rust-overlay.follows = "rs-harbor/rust-overlay";
-    crane.follows = "rs-harbor/crane";
+    harbor-rs.url = "git+https://github.com/caniko/harbor-rs.git?ref=trunk&rev=f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac";
+    nixpkgs.follows = "harbor-rs/nixpkgs";
+    rust-overlay.follows = "harbor-rs/rust-overlay";
+    crane.follows = "harbor-rs/crane";
   };
 
-  outputs = { self, nixpkgs, rs-harbor, rust-overlay, ... }:
+  outputs = { self, nixpkgs, harbor-rs, rust-overlay, ... }:
     let
       systems = [
         "x86_64-linux"
@@ -29,10 +29,10 @@
     {
       packages = forAllSystems ({ pkgs, lib }:
         let
-          toolchain = rs-harbor.lib.mkToolchain { inherit pkgs; };
-          buildCache = rs-harbor.lib.mkBuildCachePolicy {
+          toolchain = harbor-rs.lib.mkToolchain { inherit pkgs; };
+          buildCache = harbor-rs.lib.mkBuildCachePolicy {
             inherit pkgs;
-            sccachePackage = rs-harbor.packages.${pkgs.system}.sccache;
+            sccachePackage = harbor-rs.packages.${pkgs.system}.sccache;
             cacheRoot = null;
             namespaceScope = "canix-rust";
             namespaceGeneration = 5;
@@ -102,7 +102,7 @@
 
       devShells = forAllSystems ({ pkgs, ... }:
         let
-          toolchain = rs-harbor.lib.mkToolchain { inherit pkgs; };
+          toolchain = harbor-rs.lib.mkToolchain { inherit pkgs; };
         in {
         default = pkgs.mkShell {
           packages = [

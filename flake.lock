@@ -87,11 +87,38 @@
         "type": "github"
       }
     },
+    "harbor-rs": {
+      "inputs": {
+        "crane": "crane",
+        "flake-parts": "flake-parts",
+        "meta-harbor": "meta-harbor",
+        "nix-bundle": "nix-bundle",
+        "nix-opencode-lsp": "nix-opencode-lsp",
+        "nixpkgs": "nixpkgs",
+        "osxcross": "osxcross",
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1786573790,
+        "narHash": "sha256-HNroLml6L6xV7ZS5pS8QYQdxfPqayi6kJYrClxNa3Gs=",
+        "ref": "trunk",
+        "rev": "f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac",
+        "revCount": 164,
+        "type": "git",
+        "url": "https://github.com/caniko/harbor-rs.git"
+      },
+      "original": {
+        "ref": "trunk",
+        "rev": "f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac",
+        "type": "git",
+        "url": "https://github.com/caniko/harbor-rs.git"
+      }
+    },
     "meta-harbor": {
       "inputs": {
         "flake-parts": "flake-parts_2",
         "nixpkgs": [
-          "rs-harbor",
+          "harbor-rs",
           "nixpkgs"
         ]
       },
@@ -113,7 +140,7 @@
     "nix-bundle": {
       "inputs": {
         "nixpkgs": [
-          "rs-harbor",
+          "harbor-rs",
           "nixpkgs"
         ],
         "utils": "utils"
@@ -136,7 +163,7 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
-          "rs-harbor",
+          "harbor-rs",
           "nixpkgs"
         ]
       },
@@ -203,7 +230,7 @@
       "inputs": {
         "flake-utils": "flake-utils_2",
         "nixpkgs": [
-          "rs-harbor",
+          "harbor-rs",
           "nixpkgs"
         ]
       },
@@ -225,51 +252,24 @@
     "root": {
       "inputs": {
         "crane": [
-          "rs-harbor",
+          "harbor-rs",
           "crane"
         ],
+        "harbor-rs": "harbor-rs",
         "nixpkgs": [
-          "rs-harbor",
+          "harbor-rs",
           "nixpkgs"
         ],
-        "rs-harbor": "rs-harbor",
         "rust-overlay": [
-          "rs-harbor",
+          "harbor-rs",
           "rust-overlay"
         ]
-      }
-    },
-    "rs-harbor": {
-      "inputs": {
-        "crane": "crane",
-        "flake-parts": "flake-parts",
-        "meta-harbor": "meta-harbor",
-        "nix-bundle": "nix-bundle",
-        "nix-opencode-lsp": "nix-opencode-lsp",
-        "nixpkgs": "nixpkgs",
-        "osxcross": "osxcross",
-        "rust-overlay": "rust-overlay"
-      },
-      "locked": {
-        "lastModified": 1786573790,
-        "narHash": "sha256-HNroLml6L6xV7ZS5pS8QYQdxfPqayi6kJYrClxNa3Gs=",
-        "ref": "trunk",
-        "rev": "f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac",
-        "revCount": 164,
-        "type": "git",
-        "url": "https://github.com/caniko/rs-harbor.git"
-      },
-      "original": {
-        "ref": "trunk",
-        "rev": "f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac",
-        "type": "git",
-        "url": "https://github.com/caniko/rs-harbor.git"
       }
     },
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
-          "rs-harbor",
+          "harbor-rs",
           "nixpkgs"
         ]
       },
