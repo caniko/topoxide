@@ -129,12 +129,13 @@
         "rev": "f3384cf15bc50fdb01c4fce1552e8c9fbad1199d",
         "revCount": 4,
         "type": "git",
-        "url": "ssh://git@codeberg.org/caniko/meta-harbor.git"
+        "url": "https://github.com/caniko/harbor-meta.git"
       },
       "original": {
         "ref": "trunk",
+        "rev": "f3384cf15bc50fdb01c4fce1552e8c9fbad1199d",
         "type": "git",
-        "url": "ssh://git@codeberg.org/caniko/meta-harbor.git"
+        "url": "https://github.com/caniko/harbor-meta.git"
       }
     },
     "nix-bundle": {

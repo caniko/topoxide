@@ -3,6 +3,9 @@
 
   inputs = {
     harbor-rs.url = "git+https://github.com/caniko/harbor-rs.git?ref=trunk&rev=f209ddbca3fdbb0dc31fa3886ccc2ff7369c18ac";
+    # codeberg.org no longer resolves; fetch the same meta-harbor revision from GitHub.
+    harbor-rs.inputs.meta-harbor.url = "git+https://github.com/caniko/harbor-meta.git?ref=trunk&rev=f3384cf15bc50fdb01c4fce1552e8c9fbad1199d";
+    harbor-rs.inputs.meta-harbor.inputs.nixpkgs.follows = "harbor-rs/nixpkgs";
     nixpkgs.follows = "harbor-rs/nixpkgs";
     rust-overlay.follows = "harbor-rs/rust-overlay";
     crane.follows = "harbor-rs/crane";
